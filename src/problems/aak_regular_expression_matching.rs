@@ -10,7 +10,51 @@ enum CharMatchMode {
     SpecificChar,
 }
 
+
+//testit("ab", ".*p", false);
+//
 pub fn is_match(s: String, p: String) -> bool {
+
+   if s.len() == 0 && p.len() == 0 {
+       return true;
+   } 
+
+   let mut p_chars = p.chars().peekable(); 
+
+   match p_chars.next() {
+       Some(c) => {
+           let to_match = c;
+           match p_chars.peek() {
+               Some('*') => {
+                   if s.len() > 0 && (c == '.' || s.starts_with(to_match)){
+                       println!("---1 -- s:{} p:{}, to_match:{}", s, p, to_match);
+                       //consume the char from s and keep the pattern
+                       is_match(s[1..].to_string(), p)
+                   }
+                   else {
+                       println!("---2 -- s:{} p:{}, to_match:{}", s, p, to_match);
+                       //no char to consume, so drop the <char>* from the p
+                       is_match(s, p[2..].to_string())
+                   }
+               },
+               _ => {
+                   if c == '.' || s.starts_with(to_match){
+                       println!("---3 -- s:{} p:{}, to_match:{}", s, p, to_match);
+                       //consume the char from s and p
+                       is_match(s[1..].to_string(), p[1..].to_string())
+                   } else {
+                       println!("---4 -- s:{} p:{}, to_match:{}", s, p, to_match);
+                       return false;
+                   }
+               }
+           }
+       },
+       _ => { return false; } //no pattern left, but still string
+   }
+
+}
+
+pub fn is_match_fucked(s: String, p: String) -> bool {
     let s_bytes = s.as_bytes();
     let mut p_chars = p.chars().peekable();
 
@@ -70,23 +114,25 @@ mod tests {
     #[test]
     fn it_works() {
         testit("aa", "a", false);
-        testit("aa", "a", false);
         testit("aa", "a*", true);
-        testit("ab", ".*", true);
-        testit("aab", "c*a*b", true);
-        testit("mississippi", "mis*is*p*", false);
-        testit("ab", ".*p", false);
     }
 
     #[test]
     fn not_working() {
     //    testit("mississippi", "mis*is*ip*.", true);
         testit("ab", ".*p", false);
+        testit("aa", "a", false);
+        testit("aa", "a*", true);
+        testit("ab", ".*", true);
+        testit("aab", "c*a*b", true);
+        testit("mississippi", "mis*is*p*", false);
+        testit("ab", ".*p", false);
+        testit("ab", ".*", true);
+        testit("ab", ".*p", false);
     }
 
     #[test]
     fn debug_tests() {
-        testit("ab", ".*", true);
     }
 
 }
