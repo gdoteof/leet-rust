@@ -14,39 +14,41 @@ enum CharMatchMode {
 //testit("ab", ".*p", false);
 //
 pub fn is_match(s: String, p: String) -> bool {
+    fn is_match_str(s: &str, p: &str) -> bool {
+       if s.len() == 0 && p.len() == 0 {
+           return true;
+       } 
 
-   if s.len() == 0 && p.len() == 0 {
-       return true;
-   } 
+       let mut p_chars = p.chars().peekable(); 
 
-   let mut p_chars = p.chars().peekable(); 
-
-   match p_chars.next() {
-       Some(c) => {
-           match p_chars.peek() {
-               Some('*') => {
-                   if s.len() > 0 && (c == '.' || s.starts_with(c)){
-                       //consume the char from s and keep the pattern
-                       is_match(s[1..].to_string(), p)
-                   }
-                   else {
-                       //no char to consume, so drop the <char>* from the p
-                       is_match(s, p[2..].to_string())
-                   }
-               },
-               _ => {
-                   if s.len() > 0 && (c == '.' || s.starts_with(c)){
-                       //consume the char from s and p
-                       is_match(s[1..].to_string(), p[1..].to_string())
-                   } else {
-                       return false;
+       match p_chars.next() {
+           Some(c) => {
+               match p_chars.peek() {
+                   Some('*') => {
+                       if s.len() > 0 && (c == '.' || s.starts_with(c)){
+                           //consume the char from s and keep the pattern
+                           is_match_str(&s[1..], p)
+                       }
+                       else {
+                           //no char to consume, so drop the <char>* from the p
+                           is_match_str(s, &p[2..])
+                       }
+                   },
+                   _ => {
+                       if s.len() > 0 && (c == '.' || s.starts_with(c)){
+                           //consume the char from s and p
+                           is_match_str(&s[1..], &p[1..])
+                       } else {
+                           return false;
+                       }
                    }
                }
-           }
-       },
-       _ => { return false; } //no pattern left, but still string
-   }
+           },
+           _ => { return false; } //no pattern left, but still string
+       }
+    }
 
+    is_match_str(&s, &p)
 }
 
 pub fn is_match_fucked(s: String, p: String) -> bool {
