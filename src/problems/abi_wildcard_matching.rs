@@ -18,10 +18,10 @@ pub fn is_match(s: String, p: String) -> bool {
         };
 
         let res = match parse(p){
-            (Pattern::Empty, _) => s.is_empty(),
-            (Pattern::ManyOrNone, _) if s.is_empty() => is_match_bytes(s, &p[1..], dp),
-            (Pattern::ManyOrNone, _) => is_match_single(s, Pattern::SingleAny, p, dp) || is_match_bytes(&s[1..], p, dp) || is_match_bytes(s, &p[1..], dp),
-            (single, _)  => is_match_single(s, single, p, dp),
+            Pattern::Empty => s.is_empty(),
+            Pattern::ManyOrNone if s.is_empty() => is_match_bytes(s, &p[1..], dp),
+            Pattern::ManyOrNone => is_match_single(s, Pattern::SingleAny, p, dp) || is_match_bytes(&s[1..], p, dp) || is_match_bytes(s, &p[1..], dp),
+            single  => is_match_single(s, single, p, dp),
         };
 
         dp[p.len()][s.len()] = Some(res);
@@ -45,12 +45,12 @@ pub fn is_match(s: String, p: String) -> bool {
         }
     }
 
-    fn parse(pattern: &[u8]) -> (Pattern, &[u8]){
+    fn parse(pattern: &[u8]) -> Pattern{
         match pattern.split_first() {
-            Some((b'?', p_rest)) => (Pattern::SingleAny, p_rest),
-            Some((b'*', p_rest)) => (Pattern::ManyOrNone, p_rest),
-            Some((c, p_rest)) => (Pattern::Single(*c), p_rest),
-            _ => (Pattern::Empty, pattern)
+            Some((b'?', _)) => Pattern::SingleAny,
+            Some((b'*', _)) => Pattern::ManyOrNone,
+            Some((c, _)) => Pattern::Single(*c),
+            _ => (Pattern::Empty)
         }
     }
 
