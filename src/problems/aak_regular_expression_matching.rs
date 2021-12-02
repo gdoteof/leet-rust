@@ -1,11 +1,47 @@
+enum Pattern {
+    Empty,
+    Single(u8),
+    Repeatable(u8)
+}
+
+
 pub fn is_match(s: String, p: String) -> bool {
+    fn is_match_bytes(s: &[u8], p: &[u8]) -> bool {
+        match parse(p) {
+            (Pattern::Single(c), p_next) => is_match_single(s, c, p_next),
+            (Pattern::Repeatable(c), p_next) => is_match_single(s, c, p) || is_match_bytes(s, p_next),
+            (Pattern::Empty, _) => s.is_empty(),
+        }
+    }
+
+    fn is_match_single(s: &[u8], needle: u8, p: &[u8]) -> bool {
+        match s.split_first(){
+            Some((c, rest)) if *c == needle || needle == b'.' => is_match_bytes(rest, p) ,
+            _ => false
+        }
+    }
+
+    fn parse(p: &[u8]) -> (Pattern, &[u8]){
+        match p.split_first(){
+            None => (Pattern::Empty, &p),
+            Some((h,t)) => match t.split_first() {
+                Some((b'*', rest)) => (Pattern::Repeatable(*h), rest),
+                _ => (Pattern::Single(*h), t),
+            },
+        }
+    }
+    is_match_bytes(s.as_bytes(), p.as_bytes())
+}
+
+//this one much slower
+pub fn is_match_recur(s: String, p: String) -> bool {
     fn is_match_str(s: &str, p: &str) -> bool {
        if s.len() == 0 && p.len() == 0 {
            return true;
        } 
 
        let mut p_chars = p.chars().peekable(); 
-       println!("s:{}   p:{}", s, p);
+       //println!("s:{}   p:{}", s, p);
 
        match p_chars.next() {
            Some(c) => {
