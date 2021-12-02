@@ -10,7 +10,9 @@ pub fn is_match(s: String, p: String) -> bool {
     // a patternsize+1 x candidatesize+1 cache
     let dp:&mut Vec<Vec<Option<bool>>> = &mut vec!(vec!(None; s.len() + 1); p.len() + 1);
     
-    fn is_match_bytes(s: &[u8], p: &[u8], dp: &mut Vec<Vec<Option<bool>>>) -> bool {
+    type DpCacheMatrix = Vec<Vec<Option<bool>>>;
+    
+    fn is_match_bytes(s: &[u8], p: &[u8], dp: &mut DpCacheMatrix) -> bool {
         // println!("S:{:?}, P:{:?}", std::str::from_utf8(s),  std::str::from_utf8(p));
         match dp[p.len()][s.len()] {
             Some(b) => return b,
@@ -29,7 +31,7 @@ pub fn is_match(s: String, p: String) -> bool {
         res
     }
 
-    fn is_match_single(s: &[u8], token: Pattern, p: &[u8], dp: &mut Vec<Vec<Option<bool>>>) -> bool {
+    fn is_match_single(s: &[u8], token: Pattern, p: &[u8], dp: &mut DpCacheMatrix) -> bool {
         match dp[p.len()][s.len()] {
             Some(b) => return b,
             _ => ()
@@ -46,10 +48,10 @@ pub fn is_match(s: String, p: String) -> bool {
     }
 
     fn parse(pattern: &[u8]) -> Pattern{
-        match pattern.split_first() {
-            Some((b'?', _)) => Pattern::SingleAny,
-            Some((b'*', _)) => Pattern::ManyOrNone,
-            Some((c, _)) => Pattern::Single(*c),
+        match pattern.first() {
+            Some(b'?') => Pattern::SingleAny,
+            Some(b'*') => Pattern::ManyOrNone,
+            Some(c) => Pattern::Single(*c),
             _ => (Pattern::Empty)
         }
     }
