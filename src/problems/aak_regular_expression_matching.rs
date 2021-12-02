@@ -23,27 +23,22 @@ pub fn is_match(s: String, p: String) -> bool {
 
    match p_chars.next() {
        Some(c) => {
-           let to_match = c;
            match p_chars.peek() {
                Some('*') => {
-                   if s.len() > 0 && (c == '.' || s.starts_with(to_match)){
-                       println!("---1 -- s:{} p:{}, to_match:{}", s, p, to_match);
+                   if s.len() > 0 && (c == '.' || s.starts_with(c)){
                        //consume the char from s and keep the pattern
                        is_match(s[1..].to_string(), p)
                    }
                    else {
-                       println!("---2 -- s:{} p:{}, to_match:{}", s, p, to_match);
                        //no char to consume, so drop the <char>* from the p
                        is_match(s, p[2..].to_string())
                    }
                },
                _ => {
-                   if c == '.' || s.starts_with(to_match){
-                       println!("---3 -- s:{} p:{}, to_match:{}", s, p, to_match);
+                   if s.len() > 0 && (c == '.' || s.starts_with(c)){
                        //consume the char from s and p
                        is_match(s[1..].to_string(), p[1..].to_string())
                    } else {
-                       println!("---4 -- s:{} p:{}, to_match:{}", s, p, to_match);
                        return false;
                    }
                }
