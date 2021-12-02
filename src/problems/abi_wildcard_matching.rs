@@ -54,8 +54,6 @@ pub fn is_match(s: String, p: String) -> bool {
         }
     }
 
-    println!("entering");
-    println!("S:{:?}, P:{:?}", s, p);
     return is_match_bytes(&s.as_bytes(), &p.as_bytes(), dp)
 }
 
