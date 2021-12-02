@@ -1,18 +1,3 @@
-#[derive(PartialEq)]
-enum ConsumeMode {
-    OneAtATime,
-    ManyAtATime,
-}
-
-#[derive(PartialEq)]
-enum CharMatchMode {
-    AnyChar,
-    SpecificChar,
-}
-
-
-//testit("ab", ".*p", false);
-//
 pub fn is_match(s: String, p: String) -> bool {
     fn is_match_str(s: &str, p: &str) -> bool {
        if s.len() == 0 && p.len() == 0 {
@@ -20,14 +5,17 @@ pub fn is_match(s: String, p: String) -> bool {
        } 
 
        let mut p_chars = p.chars().peekable(); 
+       println!("s:{}   p:{}", s, p);
 
        match p_chars.next() {
            Some(c) => {
                match p_chars.peek() {
                    Some('*') => {
                        if s.len() > 0 && (c == '.' || s.starts_with(c)){
-                           //consume the char from s and keep the pattern
-                           is_match_str(&s[1..], p)
+                           //try both: 
+                           // - consuming the char from s and keep the pattern
+                           // - consuming the char from s and drop the pattern
+                           is_match_str(&s[1..], p) || is_match_str(&s[1..], &p[2..])
                        }
                        else {
                            //no char to consume, so drop the <char>* from the p
@@ -49,55 +37,6 @@ pub fn is_match(s: String, p: String) -> bool {
     }
 
     is_match_str(&s, &p)
-}
-
-pub fn is_match_fucked(s: String, p: String) -> bool {
-    let s_bytes = s.as_bytes();
-    let mut p_chars = p.chars().peekable();
-
-
-    //index to traverse bytes of the string
-    let mut i = 0; 
-
-    while let Some(p_char) = p_chars.next() {
-        let consume_mode = match p_chars.peek(){
-            Some('*') => {p_chars.next(); ConsumeMode::ManyAtATime}, 
-            _ => ConsumeMode::OneAtATime
-        };
-
-        let (char_match_mode, char_to_match) = match p_char {
-            '.' => (CharMatchMode::AnyChar, '?'),
-            c => (CharMatchMode::SpecificChar, c)
-        };
-
-        while i < s.len() {
-            if consume_mode == ConsumeMode::ManyAtATime {
-                if char_match_mode == CharMatchMode::SpecificChar{
-                    if s_bytes[i] as char  == char_to_match {
-                        i += 1;
-                        continue;
-                    } else {
-                        i += 1;
-                        break;
-                    }
-                } else {
-                    i += 1;
-                    continue;
-                }
-            }
-
-            if consume_mode == ConsumeMode::OneAtATime {
-                if s_bytes[i] as char  == char_to_match {
-                    i += 1;
-                    break;
-                } else {
-                    return false;
-                }
-            }
-
-        }
-    }
-    return i == s.len();
 }
 
 #[cfg(test)]
@@ -130,6 +69,7 @@ mod tests {
 
     #[test]
     fn debug_tests() {
+        testit("aa", "a*a", true);
     }
 
 }
