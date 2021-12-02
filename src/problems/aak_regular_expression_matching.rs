@@ -12,10 +12,11 @@ pub fn is_match(s: String, p: String) -> bool {
                match p_chars.peek() {
                    Some('*') => {
                        if s.len() > 0 && (c == '.' || s.starts_with(c)){
-                           //try both: 
+                           //try all: 
                            // - consuming the char from s and keep the pattern
                            // - consuming the char from s and drop the pattern
-                           is_match_str(&s[1..], p) || is_match_str(&s[1..], &p[2..])
+                           // - NOT consuming the char from s and drop the pattern
+                           is_match_str(&s[1..], p) || is_match_str(&s[1..], &p[2..]) || is_match_str(s, &p[2..])
                        }
                        else {
                            //no char to consume, so drop the <char>* from the p
@@ -51,11 +52,7 @@ mod tests {
     fn it_works() {
         testit("aa", "a", false);
         testit("aa", "a*", true);
-    }
-
-    #[test]
-    fn not_working() {
-    //    testit("mississippi", "mis*is*ip*.", true);
+        testit("aa", "a*a", true);
         testit("ab", ".*p", false);
         testit("aa", "a", false);
         testit("aa", "a*", true);
@@ -65,11 +62,17 @@ mod tests {
         testit("ab", ".*p", false);
         testit("ab", ".*", true);
         testit("ab", ".*p", false);
+        testit("mississippi", "mis*is*ip*.", true);
+    }
+
+    #[test]
+    fn not_working() {
+        testit("a", "a*a", true);
     }
 
     #[test]
     fn debug_tests() {
-        testit("aa", "a*a", true);
+        testit("bbbba", ".*a*a", true);
     }
 
 }
