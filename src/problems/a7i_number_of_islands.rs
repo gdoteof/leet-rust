@@ -26,8 +26,8 @@ pub fn num_islands(grid: Vec<Vec<char>>) -> i32{
     //marking it as we go.
     
     let mut accum:i32 = 0;
-    for i in 0..grid.len() {
-        for j in 0..grid[0].len() {
+    for i in 0..rows {
+        for j in 0..cols {
             if grid[i][j] == '1' && !visited_cache[i*cols + j] {
                 accum+=1;
                 dive(&grid, i, j, &mut visited_cache, rows, cols);
